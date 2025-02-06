@@ -7,11 +7,7 @@ This API classifies a given number by checking whether it is prime, perfect, an 
 **GET** `/api/classify-number?number=<number>`
 
 ### Example Request
-GET https://your-app-name.herokuapp.com/api/classify-number?number=371
-
-bash
-Copy
-Edit
+GET https://number-classification-api-73il.onrender.com/api/classify-number?number=371
 
 ### Example Response (200 OK)
 ```json
@@ -24,9 +20,7 @@ Edit
     "fun_fact": "371 is an Armstrong number because 3^3 + 7^3 + 1^3 = 371"
 }
 Example Error Response (400 Bad Request)
-json
-Copy
-Edit
+
 {
     "number": "alphabet",
     "error": true,
@@ -34,30 +28,22 @@ Edit
 }
 Setup Instructions
 Clone the repository:
-bash
-Copy
-Edit
+
 git clone https://github.com/yourusername/number-classification-api.git
 cd number-classification-api
 Create and activate a virtual environment:
-bash
-Copy
-Edit
+
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 Install the dependencies:
-bash
-Copy
-Edit
+
 pip install -r requirements.txt
 Run the app:
-bash
-Copy
-Edit
+
 python app.py
 Access the API at: http://127.0.0.1:5000/api/classify-number?number=371
 Deployment
-This API is deployed at: https://your-app-name.herokuapp.com
+This API is deployed at: https://number-classification-api-73il.onrender.com
 
 Tech Stack
 Language: Python
