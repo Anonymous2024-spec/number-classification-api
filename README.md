@@ -57,7 +57,7 @@ Edit
 python app.py
 Access the API at: http://127.0.0.1:5000/api/classify-number?number=371
 Deployment
-This API is deployed at: https://your-app-name.herokuapp.com
+This API is deployed at: https://number-classification-api-73il.onrender.com
 
 Tech Stack
 Language: Python
