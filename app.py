@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 from flask_cors import CORS
 from datetime import datetime
 import requests
@@ -8,7 +8,6 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Utility Functions
-
 def is_prime(n):
     """Return True if n is a prime number, else False."""
     if n <= 1:
@@ -101,6 +100,15 @@ def classify_number():
         "fun_fact": fun_fact
     }
     return jsonify(result), 200
+
+# Define the home route BEFORE calling app.run()
+@app.route('/', methods=['GET'])
+def home():
+    return (
+        "<h1>Welcome to the Number Classification API</h1>"
+        "<p>Use the endpoint <code>/api/classify-number?number=&lt;your_number&gt;</code> "
+        "to classify a number.</p>"
+    )
 
 # Run the app
 if __name__ == '__main__':
