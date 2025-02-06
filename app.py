@@ -65,7 +65,7 @@ def get_fun_fact(n):
     except Exception:
         return "No fun fact available."
 
-@app.route('/api/classify-number', methods=['GET'])
+@app.route('/api/classify-number', methods=['GET'], strict_slashes=False)
 def classify_number():
     # Get 'number' parameter from query string
     num_str = request.args.get('number', '')
