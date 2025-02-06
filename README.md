@@ -1,21 +1,18 @@
-# HNG12 Public API
+# Number Classification API
 
-This is a simple Flask-based public API for HNG12 that returns basic information in JSON format.  
-The API provides:
+## Description
 
-- A registered email address.
-- The current datetime in ISO 8601 format (UTC).
-- The GitHub URL of the project's codebase.
+This API classifies a given number by checking whether it is prime, perfect, an Armstrong number, and whether it is odd or even. It also computes the sum of its digits and fetches a fun fact about the number from Numbers API.
+
+## API Endpoint
+
+**GET** `/api/classify-number?number=<number>`
 
 ## 🚀 Live URL
 
 - **Base URL:** `<https://number-classification-api-73il.onrender.com>`
 
 ## 📌 Features
-
-- Returns a JSON response with an email, timestamp, and GitHub link.
-- CORS enabled for cross-origin access.
-- Built using Flask, a lightweight Python web framework.
 
 ## 🛠️ Setup Instructions
 
@@ -25,4 +22,11 @@ The API provides:
 git clone https://github.com/Anonymous2024-spec/number-classification-api.git
 cd that-repo
 
+```
+
+```
+Tech Stack
+Language: Python
+Framework: Flask
+Deployment:Render
 ```
