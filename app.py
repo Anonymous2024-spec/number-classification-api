@@ -1,13 +1,17 @@
 from flask import Flask, request, jsonify, redirect
 from flask_cors import CORS
-from datetime import datetime
 import requests
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
+# Create a thread pool executor for asynchronous fun fact retrieval
+executor = ThreadPoolExecutor(max_workers=1)
+
 # Utility Functions
+
 def is_prime(n):
     """Return True if n is a prime number, else False."""
     if n <= 1:
@@ -49,15 +53,16 @@ def digit_sum(n):
     return sum(int(d) for d in str(abs(n)))
 
 def get_fun_fact(n):
-    """Retrieve a math fun fact about the number from the Numbers API."""
+    """Retrieve a math fun fact about the number from the Numbers API with a timeout."""
     url = f"http://numbersapi.com/{n}/math"
     try:
-        response = requests.get(url)
+        # Set a timeout (in seconds) to avoid long waits
+        response = requests.get(url, timeout=0.3)
         if response.status_code == 200:
             return response.text
         else:
             return "No fun fact available."
-    except Exception as e:
+    except Exception:
         return "No fun fact available."
 
 @app.route('/api/classify-number', methods=['GET'])
@@ -83,12 +88,14 @@ def classify_number():
     odd_or_even = "odd" if num % 2 != 0 else "even"
     
     # Build the properties array
-    if armstrong:
-        properties = ["armstrong", odd_or_even]
-    else:
-        properties = [odd_or_even]
+    properties = ["armstrong", odd_or_even] if armstrong else [odd_or_even]
 
-    fun_fact = get_fun_fact(num)
+    # Retrieve fun fact concurrently with a timeout
+    future = executor.submit(get_fun_fact, num)
+    try:
+        fun_fact = future.result(timeout=0.3)
+    except Exception:
+        fun_fact = "No fun fact available."
 
     # Build the JSON response
     result = {
@@ -101,7 +108,6 @@ def classify_number():
     }
     return jsonify(result), 200
 
-# Define the home route BEFORE calling app.run()
 @app.route('/', methods=['GET'])
 def home():
     return (
@@ -110,7 +116,6 @@ def home():
         "to classify a number.</p>"
     )
 
-# Run the app
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
