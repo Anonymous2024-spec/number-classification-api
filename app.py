@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import os
@@ -107,14 +107,6 @@ def classify_number():
         "fun_fact": fun_fact
     }
     return jsonify(result), 200
-
-@app.route('/', methods=['GET'])
-def home():
-    return (
-        "<h1>Welcome to the Number Classification API</h1>"
-        "<p>Use the endpoint <code>/api/classify-number?number=&lt;your_number&gt;</code> "
-        "to classify a number.</p>"
-    )
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
