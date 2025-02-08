@@ -1,112 +1,76 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
-import os
-from concurrent.futures import ThreadPoolExecutor
-
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-
-# Create a thread pool executor for asynchronous fun fact retrieval
-executor = ThreadPoolExecutor(max_workers=1)
-
-# Utility Functions
-
+CORS(app)
 def is_prime(n):
-    """Return True if n is a prime number, else False."""
     if n <= 1:
         return False
-    if n <= 3:
+    if n == 2:
         return True
-    if n % 2 == 0 or n % 3 == 0:
+    if n % 2 == 0:
         return False
-    i = 5
-    while i * i <= n:
-        if n % i == 0 or n % (i + 2) == 0:
+    max_divisor = int(n ** 0.5) + 1
+    for d in range(3, max_divisor, 2):
+        if n % d == 0:
             return False
-        i += 6
     return True
-
 def is_perfect(n):
-    """Return True if n is a perfect number, else False."""
-    if n < 2:
+    if n <= 1:
         return False
-    # Calculate sum of proper divisors
-    divisors_sum = 1
-    i = 2
-    while i * i <= n:
-        if n % i == 0:
-            divisors_sum += i
-            if i != n // i:
-                divisors_sum += n // i
-        i += 1
-    return divisors_sum == n
-
+    sum_divisors = 1
+    max_divisor = int(n ** 0.5) + 1
+    for d in range(2, max_divisor):
+        if n % d == 0:
+            sum_divisors += d
+            other = n // d
+            if other != d:
+                sum_divisors += other
+    return sum_divisors == n
+def digit_sum(n):
+    return sum(int(d) for d in str(abs(n)))
 def is_armstrong(n):
-    """Return True if n is an Armstrong number, else False."""
     if n < 0:
         return False
-    digits = [int(d) for d in str(n)]
-    power = len(digits)
-    return sum(d ** power for d in digits) == n
-
-def digit_sum(n):
-    """Return the sum of digits of n."""
-    return sum(int(d) for d in str(abs(n)))
-
-def get_fun_fact(n):
-    """Retrieve a math fun fact about the number from the Numbers API with a timeout."""
-    url = f"https://numbersapi.com/{n}/math"
-    try:
-        # Set a timeout (in seconds) to avoid long waits
-        response = requests.get(url, timeout=0.3)
-        return response.text if response.status_code == 200 else "No fun fact available."
-    except Exception:
-        return "No fun fact available."
-
-@app.route('/api/classify-number', methods=['GET'], strict_slashes=False)
+    num_str = str(n)
+    num_digits = len(num_str)
+    sum_powers = sum(int(d) ** num_digits for d in num_str)
+    return sum_powers == n
+@app.route('/api/classify-number', methods=['GET'])
 def classify_number():
-    # Get 'number' parameter from query string
-    num_str = request.args.get('number', '')
-    
-    # Validate the input: must be an integer
+    number_param = request.args.get('number')
+    if not number_param:
+        return jsonify({"number": None, "error": True}), 400
     try:
-        num = int(num_str)
+        num = int(number_param)
     except ValueError:
-        return jsonify({
-            "number": num_str,
-            "error": True,
-            "message": "Invalid input. Please provide a valid integer."
-        }), 400
-
-    # Compute properties
-    prime = is_prime(num)
-    perfect = is_perfect(num)
-    armstrong = is_armstrong(num)
-    ds = digit_sum(num)
-    odd_or_even = "odd" if num % 2 != 0 else "even"
-    
-    # Build the properties array
-    properties = ["armstrong", odd_or_even] if armstrong else [odd_or_even]
-
-    # Retrieve fun fact concurrently with a timeout
-    future = executor.submit(get_fun_fact, num)
+        return jsonify({"number": number_param, "error": True}), 400
+    properties = []
+    if num % 2 == 0:
+        properties.append('even')
+    else:
+        properties.append('odd')
+    if is_prime(num):
+        properties.append('prime')
+    if is_perfect(num):
+        properties.append('perfect')
+    if is_armstrong(num):
+        properties.append('armstrong')
+    fun_fact = 'No fun fact available.'
     try:
-        fun_fact = future.result(timeout=0.3)
-    except Exception:
-        fun_fact = "No fun fact available."
-
-    # Build the JSON response
-    result = {
+        response = requests.get(f'http://numbersapi.com/{num}/math?json', timeout=3)
+        if response.status_code == 200:
+            data = response.json()
+            fun_fact = data.get('text', fun_fact)
+    except requests.exceptions.RequestException:
+        pass
+    return jsonify({
         "number": num,
-        "is_prime": prime,
-        "is_perfect": perfect,
+        "is_prime": is_prime(num),
+        "is_perfect": is_perfect(num),
         "properties": properties,
-        "digit_sum": ds,
+        "digit_sum": digit_sum(num),
         "fun_fact": fun_fact
-    }
-    return jsonify(result), 200
-
+    })
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run()
