@@ -54,7 +54,7 @@ def digit_sum(n):
 
 def get_fun_fact(n):
     """Retrieve a math fun fact about the number from the Numbers API with a timeout."""
-    url = f"http://numbersapi.com/{n}/math"
+    url = f"https://numbersapi.com/{n}/math"
     try:
         # Set a timeout (in seconds) to avoid long waits
         response = requests.get(url, timeout=0.3)
