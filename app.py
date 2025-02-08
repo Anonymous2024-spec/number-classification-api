@@ -44,6 +44,8 @@ def is_perfect(n):
 
 def is_armstrong(n):
     """Return True if n is an Armstrong number, else False."""
+    if n < 0:
+        return False
     digits = [int(d) for d in str(n)]
     power = len(digits)
     return sum(d ** power for d in digits) == n
@@ -58,10 +60,7 @@ def get_fun_fact(n):
     try:
         # Set a timeout (in seconds) to avoid long waits
         response = requests.get(url, timeout=0.3)
-        if response.status_code == 200:
-            return response.text
-        else:
-            return "No fun fact available."
+        return response.text if response.status_code == 200 else "No fun fact available."
     except Exception:
         return "No fun fact available."
 
